@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buyer Dashboard - Book Exchange</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .role-badge {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #666;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .card p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .card-link {
+            display: inline-block;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .card-link:hover {
+            color: #764ba2;
+        }
+
+        .action-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .action-section h2 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-btn {
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .welcome-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .welcome-message h2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-message p {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">📚 BookExchange</div>
+        <div class="navbar-right">
+            <span class="role-badge">👤 BUYER</span>
+            <a href="/auth/login" class="logout-btn">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="welcome-message">
+            <h2>Welcome, Buyer!</h2>
+            <p>Browse and purchase books from our platform. Find your next favorite book today!</p>
+        </div>
+
+        <div class="header">
+            <h1>Your Dashboard</h1>
+            <p>Manage your purchases and wishlist</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-icon">🛒</div>
+                <h3>Purchase Orders</h3>
+                <p>Books you've ordered</p>
+                <div class="card-value">0</div>
+                <a href="#" class="card-link">View Orders →</a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">💗</div>
+                <h3>Wishlist</h3>
+                <p>Books you're interested in</p>
+                <div class="card-value">0</div>
+                <a href="#" class="card-link">View Wishlist →</a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">⭐</div>
+                <h3>Reviews</h3>
+                <p>Your book reviews and ratings</p>
+                <div class="card-value">0</div>
+                <a href="#" class="card-link">View Reviews →</a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">💰</div>
+                <h3>My Wallet</h3>
+                <p>Account balance and transactions</p>
+                <div class="card-value">$0.00</div>
+                <a href="#" class="card-link">View Wallet →</a>
+            </div>
+        </div>
+
+        <div class="action-section">
+            <h2>Quick Actions</h2>
+            <div class="action-buttons">
+                <button class="action-btn">🔍 Browse Books</button>
+                <button class="action-btn">🛒 Shopping Cart</button>
+                <button class="action-btn">📦 Track Orders</button>
+                <button class="action-btn">💬 Contact Seller</button>
+                <button class="action-btn">⭐ Leave Review</button>
+                <button class="action-btn">⚙️ Account Settings</button>
+            </div>
+        </div>
+
+        <div class="action-section">
+            <h2>Recent Purchases</h2>
+            <p style="color: #999;">No recent purchases to display</p>
+        </div>
+    </div>
+</body>
+</html>
+
