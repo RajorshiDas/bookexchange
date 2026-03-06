@@ -194,14 +194,18 @@
         <div class="navbar-brand">📚 BookExchange</div>
         <div class="navbar-right">
             <span class="role-badge">💼 SELLER</span>
-            <a href="/auth/login" class="logout-btn">Logout</a>
+            <span th:if="${firstName}" th:text="'Hello, ' + ${firstName} + '!'" style="font-size:0.95rem; opacity:0.9;"></span>
+            <form th:action="@{/auth/logout}" method="post" style="display:inline;">
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
         </div>
     </nav>
 
     <div class="container">
         <div class="welcome-message">
-            <h2>Welcome, Seller!</h2>
+            <h2 th:text="'Welcome, ' + (${firstName} ?: 'Seller') + '!'">Welcome, Seller!</h2>
             <p>Manage your books, track sales, and grow your business on BookExchange.</p>
+            <p th:if="${email}" th:text="'Logged in as: ' + ${email}" style="font-size:0.85rem; opacity:0.8; margin-top:0.3rem;"></p>
         </div>
 
         <div class="header">
