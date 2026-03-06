@@ -1,54 +1,67 @@
 package com.example.bookexchange.controller;
 
 import com.example.bookexchange.dto.RegisterRequest;
+import com.example.bookexchange.entity.UserRole;
 import com.example.bookexchange.service.AuthService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
 
-    // Show login page
+    // Constructor injection
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
+
+    // ----------------------------------------------------------------
+    // GET /auth/login — show login page only
+    // POST /auth/login is handled entirely by Spring Security
+    // ----------------------------------------------------------------
     @GetMapping("/login")
-    public String showLoginPage(@RequestParam(required = false) String error,
-                                 @RequestParam(required = false) String logout,
-                                 Model model) {
-        if (error != null) {
-            model.addAttribute("error", "Invalid username or password. Please try again.");
-        }
-        if (logout != null) {
-            model.addAttribute("success", "You have been logged out successfully.");
-        }
+    public String showLoginPage() {
         return "login";
     }
 
-    // Show registration page
+    // ----------------------------------------------------------------
+    // GET /auth/register — show registration form
+    // ----------------------------------------------------------------
     @GetMapping("/register")
     public String showRegisterPage(Model model) {
+        // Only pass BUYER and SELLER — ADMIN cannot self-register
+        model.addAttribute("roles", List.of(UserRole.BUYER, UserRole.SELLER));
+
         if (!model.containsAttribute("registerRequest")) {
             model.addAttribute("registerRequest", new RegisterRequest());
         }
         return "register";
     }
 
-    // Handle registration form submission
+    // ----------------------------------------------------------------
+    // POST /auth/register — register a new user via AuthService
+    // ----------------------------------------------------------------
     @PostMapping("/register")
     public String handleRegister(@ModelAttribute RegisterRequest registerRequest,
-                                  Model model,
-                                  RedirectAttributes redirectAttributes) {
+                                 Model model,
+                                 RedirectAttributes redirectAttributes) {
         try {
             authService.register(registerRequest);
-            redirectAttributes.addFlashAttribute("success", "Registration successful! Please login.");
+            // Success: flash message and redirect to login
+            redirectAttributes.addFlashAttribute("success",
+                    "Registration successful! Please login.");
             return "redirect:/auth/login";
+
         } catch (Exception e) {
+            // Error: return to register page with error and preserve form data
             model.addAttribute("error", e.getMessage());
+            model.addAttribute("roles", List.of(UserRole.BUYER, UserRole.SELLER));
             model.addAttribute("registerRequest", registerRequest);
             return "register";
         }

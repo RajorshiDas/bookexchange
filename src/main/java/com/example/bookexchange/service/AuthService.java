@@ -21,7 +21,8 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
 
     public String register(RegisterRequest request) throws Exception {
-        // Validate input
+
+        // --- Step 1: Validate required fields ---
         if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
             throw new Exception("Username is required");
         }
@@ -31,35 +32,53 @@ public class AuthService {
         if (request.getPassword() == null || request.getPassword().isEmpty()) {
             throw new Exception("Password is required");
         }
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new Exception("Passwords do not match");
+        if (request.getConfirmPassword() == null || request.getConfirmPassword().isEmpty()) {
+            throw new Exception("Please confirm your password");
         }
         if (request.getRole() == null) {
             throw new Exception("Role is required");
         }
 
-        // Check if username already exists
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new Exception("Username already exists");
+        // --- Step 2: Passwords must match ---
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new Exception("Passwords do not match");
         }
 
-        // Check if email already exists
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new Exception("Email already exists");
+        // --- Step 3: Block ADMIN self-registration ---
+        // Only BUYER and SELLER are allowed to register publicly
+        if (request.getRole() == UserRole.ADMIN) {
+            throw new Exception("Admin accounts cannot be created through public registration");
         }
 
-        // Create new user
+        // Only BUYER or SELLER are valid roles
+        if (request.getRole() != UserRole.BUYER && request.getRole() != UserRole.SELLER) {
+            throw new Exception("Invalid role. Please select Buyer or Seller");
+        }
+
+        // --- Step 4: Check for duplicate username ---
+        if (userRepository.existsByUsername(request.getUsername().trim())) {
+            throw new Exception("Username '" + request.getUsername() + "' is already taken");
+        }
+
+        // --- Step 5: Check for duplicate email ---
+        if (userRepository.existsByEmail(request.getEmail().trim())) {
+            throw new Exception("An account with email '" + request.getEmail() + "' already exists");
+        }
+
+        // --- Step 6: Build and save the new user ---
         User user = new User();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setUsername(request.getUsername().trim());
+        user.setEmail(request.getEmail().trim());
+        user.setPassword(passwordEncoder.encode(request.getPassword())); // BCrypt hash
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setRole(request.getRole());
-        user.setEnabled(true);
+        user.setEnabled(true); // Account is active immediately
 
         userRepository.save(user);
-        return "User registered successfully as " + request.getRole();
+
+        return "Registration successful! Welcome, " + user.getFirstName()
+                + ". You are registered as a " + user.getRole().name() + ".";
     }
 
     public Optional<User> authenticate(LoginRequest request) {
