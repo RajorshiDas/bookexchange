@@ -205,14 +205,14 @@
                 <label for="role">Select Your Role</label>
                 <select id="role" th:field="*{role}" required>
                     <option value="">-- Choose a role --</option>
-                    <option value="BUYER">Buyer</option>
-                    <option value="SELLER">Seller</option>
-                    <option value="ADMIN">Admin</option>
+                    <option th:each="r : ${roles}"
+                            th:value="${r}"
+                            th:text="${#strings.capitalize(#strings.toLowerCase(r.name()))}">
+                    </option>
                 </select>
                 <div class="role-info">
                     <strong>Buyer:</strong> Browse and purchase books from sellers.<br>
-                    <strong>Seller:</strong> List books for sale and manage your inventory.<br>
-                    <strong>Admin:</strong> Manage the platform (admin registration may require approval).
+                    <strong>Seller:</strong> List books for sale and manage your inventory.
                 </div>
             </div>
 

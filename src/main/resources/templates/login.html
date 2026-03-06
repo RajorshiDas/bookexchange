@@ -145,7 +145,8 @@
             <p>Login to your account</p>
         </div>
 
-        <div th:if="${error}" class="error" th:text="${error}"></div>
+        <div th:if="${param.error}" class="error">Invalid username or password. Please try again.</div>
+        <div th:if="${param.logout}" class="success">You have been logged out successfully.</div>
         <div th:if="${success}" class="success" th:text="${success}"></div>
 
         <form th:action="@{/auth/login}" method="POST">
