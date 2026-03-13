@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Books - Book Exchange</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        /* Navbar Styles */
+        nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            margin-right: 2rem;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
+        }
+
+        .logout-link {
+            float: right;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+
+        /* Container Styles */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            color: #333;
+            font-size: 2rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Alert Styles */
+        .alert {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: #28a745;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        /* Books Grid/List Styles */
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .book-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .book-card h2 {
+            color: #667eea;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .book-info {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .book-info strong {
+            color: #333;
+        }
+
+        .book-condition {
+            display: inline-block;
+            background: #e8e8e8;
+            color: #333;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 0.5rem 0;
+        }
+
+        .book-description {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 1rem 0;
+            flex-grow: 1;
+        }
+
+        .book-price {
+            font-size: 1.3rem;
+            color: #28a745;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+
+        .book-status {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .status-available {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-reserved {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-exchanged {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-sold {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Action Buttons */
+        .book-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+
+        .btn-edit, .btn-delete {
+            flex: 1;
+            padding: 0.6rem;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-edit {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-state h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <a href="/dashboard/seller">Dashboard</a>
+        <a href="/seller/books">My Books</a>
+        <a href="/auth/logout" class="logout-link">Logout</a>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>My Books</h1>
+            <a href="/seller/books/add" class="btn-primary">+ Add New Book</a>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success">
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-error">
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Books Display -->
+        <div th:if="${#lists.isEmpty(bookListings)}" class="empty-state">
+            <h2>No Books Yet</h2>
+            <p>You haven't listed any books yet. Start by adding your first book to the marketplace!</p>
+            <a href="/seller/books/add" class="btn-primary">Add Your First Book</a>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(bookListings)}" class="books-grid">
+            <!-- Book Card for each listing -->
+            <div class="book-card" th:each="listing : ${bookListings}">
+                <div>
+                    <!-- Book Title -->
+                    <h2 th:text="${listing.book.title}">Book Title</h2>
+
+                    <!-- Book Details -->
+                    <div class="book-info">
+                        <strong>Author:</strong> <span th:text="${listing.book.author}">Author Name</span>
+                    </div>
+                    <div class="book-info" th:if="${listing.book.isbn}">
+                        <strong>ISBN:</strong> <span th:text="${listing.book.isbn}">ISBN</span>
+                    </div>
+                    <div class="book-info" th:if="${listing.book.category}">
+                        <strong>Category:</strong> <span th:text="${listing.book.category}">Category</span>
+                    </div>
+
+                    <!-- Condition Badge -->
+                    <span class="book-condition" th:text="${listing.book.condition}">GOOD</span>
+
+                    <!-- Description -->
+                    <p class="book-description" th:text="${listing.book.description}">Book description would go here...</p>
+
+                    <!-- Price and Status -->
+                    <div class="book-price" th:text="'$' + ${#numbers.formatDecimal(listing.price, 1, 2)}">$15.99</div>
+                    <span class="book-status" th:classappend="'status-' + ${#strings.toLowerCase(listing.status)}"
+                          th:text="${listing.status}">AVAILABLE</span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="book-actions">
+                    <a th:href="'/seller/books/edit/' + ${listing.id}" class="btn-edit">Edit</a>
+                    <a th:href="'/seller/books/delete/' + ${listing.id}" class="btn-delete">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Book Exchange Platform. All rights reserved.</p>
+    </footer>
+</body>
+</html>
