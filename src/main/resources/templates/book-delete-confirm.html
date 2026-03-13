@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Book - Confirmation - Book Exchange</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        /* Navbar Styles */
+        nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            margin-right: 2rem;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
+        }
+
+        .logout-link {
+            float: right;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+
+        /* Container Styles */
+        .container {
+            max-width: 500px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .confirmation-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Confirmation Header */
+        .confirmation-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .confirmation-header h1 {
+            color: #dc3545;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .confirmation-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        /* Warning Icon */
+        .warning-icon {
+            font-size: 3rem;
+            color: #dc3545;
+            margin-bottom: 1rem;
+        }
+
+        /* Book Details Box */
+        .book-details {
+            background-color: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #dc3545;
+        }
+
+        .book-details h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .detail-value {
+            color: #666;
+            text-align: right;
+            max-width: 50%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Warning Message */
+        .warning-message {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+        }
+
+        .warning-message strong {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Action Buttons */
+        .confirmation-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn-cancel {
+            background-color: #e0e0e0;
+            color: #333;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-cancel:hover {
+            background-color: #d0d0d0;
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        /* Confirmation Form */
+        .confirmation-form {
+            margin-top: 1.5rem;
+        }
+
+        .confirmation-checkbox {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .confirmation-checkbox input[type="checkbox"] {
+            margin-right: 0.5rem;
+            width: auto;
+            cursor: pointer;
+        }
+
+        .confirmation-checkbox label {
+            margin: 0;
+            font-weight: 400;
+            cursor: pointer;
+            display: inline;
+        }
+
+        .btn-delete:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-delete:disabled:hover {
+            background-color: #dc3545;
+            transform: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <a href="/dashboard/seller">Dashboard</a>
+        <a href="/seller/books">My Books</a>
+        <a href="/auth/logout" class="logout-link">Logout</a>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="confirmation-container">
+            <!-- Confirmation Header -->
+            <div class="confirmation-header">
+                <div class="warning-icon">⚠️</div>
+                <h1>Delete Book?</h1>
+                <p>This action cannot be undone</p>
+            </div>
+
+            <!-- Book Details -->
+            <div class="book-details" th:if="${bookListing}">
+                <h3>Book Details</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Title:</span>
+                    <span class="detail-value" th:text="${bookListing.book.title}">Book Title</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Author:</span>
+                    <span class="detail-value" th:text="${bookListing.book.author}">Author Name</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Condition:</span>
+                    <span class="detail-value" th:text="${bookListing.book.condition}">GOOD</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Price:</span>
+                    <span class="detail-value" th:text="'$' + ${#numbers.formatDecimal(bookListing.price, 1, 2)}">$15.99</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value" th:text="${bookListing.status}">AVAILABLE</span>
+                </div>
+            </div>
+
+            <!-- Warning Message -->
+            <div class="warning-message">
+                <strong>⚠️ Warning!</strong>
+                <p>Deleting this book listing will permanently remove it from the platform. This action cannot be reversed.</p>
+            </div>
+
+            <!-- Confirmation Form -->
+            <form method="POST" th:action="@{'/seller/books/delete/' + ${bookListing.id}}" class="confirmation-form">
+                <!-- Optional: Require confirmation checkbox -->
+                <div class="confirmation-checkbox">
+                    <input type="checkbox" id="confirm" name="confirm" required>
+                    <label for="confirm">Yes, I want to permanently delete this book</label>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="confirmation-actions">
+                    <button type="submit" class="btn btn-delete" id="deleteBtn">Delete Book</button>
+                    <a href="/seller/books" class="btn btn-cancel">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Book Exchange Platform. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript: Enable/disable delete button based on checkbox -->
+    <script>
+        const confirmCheckbox = document.getElementById('confirm');
+        const deleteBtn = document.getElementById('deleteBtn');
+
+        // Disable delete button by default
+        deleteBtn.disabled = true;
+
+        // Enable/disable delete button based on checkbox
+        confirmCheckbox.addEventListener('change', function() {
+            deleteBtn.disabled = !this.checked;
+        });
+    </script>
+</body>
+</html>

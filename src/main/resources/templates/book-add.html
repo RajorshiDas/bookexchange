@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Book - Book Exchange</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        /* Navbar Styles */
+        nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            margin-right: 2rem;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
+        }
+
+        .logout-link {
+            float: right;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+
+        /* Container Styles */
+        .container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .form-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-header h1 {
+            color: #667eea;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-header p {
+            color: #666;
+        }
+
+        /* Form Group Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .required {
+            color: #dc3545;
+            margin-left: 0.3rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="number"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .help-text {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 0.3rem;
+        }
+
+        /* Form Row for side-by-side fields */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Alert Styles */
+        .alert {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        /* Button Group */
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-cancel {
+            background-color: #e0e0e0;
+            color: #333;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-cancel:hover {
+            background-color: #d0d0d0;
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <a href="/dashboard/seller">Dashboard</a>
+        <a href="/seller/books">My Books</a>
+        <a href="/auth/logout" class="logout-link">Logout</a>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="form-container">
+            <!-- Form Header -->
+            <div class="form-header">
+                <h1>Add New Book</h1>
+                <p>List a new book for sale on the platform</p>
+            </div>
+
+            <!-- Error Messages -->
+            <div th:if="${error}" class="alert alert-error">
+                <span th:text="${error}"></span>
+            </div>
+
+            <!-- Add Book Form -->
+            <form method="POST" th:action="@{/seller/books/add}">
+                <!-- Title Field (Required) -->
+                <div class="form-group">
+                    <label for="title">
+                        Book Title
+                        <span class="required">*</span>
+                    </label>
+                    <input type="text" id="title" name="title"
+                           th:value="${title}"
+                           placeholder="Enter the book title"
+                           required>
+                    <p class="help-text">e.g., 'The Great Gatsby' or 'Clean Code'</p>
+                </div>
+
+                <!-- Author Field (Required) -->
+                <div class="form-group">
+                    <label for="author">
+                        Author
+                        <span class="required">*</span>
+                    </label>
+                    <input type="text" id="author" name="author"
+                           th:value="${author}"
+                           placeholder="Enter the author name"
+                           required>
+                    <p class="help-text">e.g., 'F. Scott Fitzgerald' or 'Robert C. Martin'</p>
+                </div>
+
+                <!-- ISBN and Category Row -->
+                <div class="form-row">
+                    <!-- ISBN Field (Optional) -->
+                    <div class="form-group">
+                        <label for="isbn">ISBN (Optional)</label>
+                        <input type="text" id="isbn" name="isbn"
+                               th:value="${isbn}"
+                               placeholder="e.g., 978-0-7432-7356-5">
+                        <p class="help-text">13-digit ISBN code (optional)</p>
+                    </div>
+
+                    <!-- Category Field (Optional) -->
+                    <div class="form-group">
+                        <label for="category">Category (Optional)</label>
+                        <input type="text" id="category" name="category"
+                               th:value="${category}"
+                               placeholder="e.g., Fiction, Science, History">
+                        <p class="help-text">Book category or genre</p>
+                    </div>
+                </div>
+
+                <!-- Description Field (Optional) -->
+                <div class="form-group">
+                    <label for="description">Description (Optional)</label>
+                    <textarea id="description" name="description"
+                              placeholder="Provide a brief description of the book's condition, highlights, or any notes..."></textarea>
+                    <p class="help-text">Tell buyers about the book and its condition</p>
+                </div>
+
+                <!-- Condition and Price Row -->
+                <div class="form-row">
+                    <!-- Book Condition (Required) -->
+                    <div class="form-group">
+                        <label for="condition">
+                            Condition
+                            <span class="required">*</span>
+                        </label>
+                        <select id="condition" name="condition" required>
+                            <option value="">-- Select Condition --</option>
+                            <option th:each="cond : ${conditions}"
+                                    th:value="${cond}"
+                                    th:text="${cond}">
+                                Condition
+                            </option>
+                        </select>
+                        <p class="help-text">Physical condition of the book</p>
+                    </div>
+
+                    <!-- Price Field (Required) -->
+                    <div class="form-group">
+                        <label for="price">
+                            Price ($)
+                            <span class="required">*</span>
+                        </label>
+                        <input type="number" id="price" name="price"
+                               th:value="${price}"
+                               step="0.01"
+                               min="0"
+                               placeholder="e.g., 15.99"
+                               required>
+                        <p class="help-text">Price in USD</p>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-submit">Add Book</button>
+                    <a href="/seller/books" class="btn btn-cancel">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Book Exchange Platform. All rights reserved.</p>
+    </footer>
+</body>
+</html>
