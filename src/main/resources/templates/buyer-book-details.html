@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Details - Book Exchange</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; color: #333; }
+        nav { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        nav a { color: white; text-decoration: none; font-weight: 600; margin-right: 2rem; }
+        nav a:hover { opacity: 0.8; }
+        .logout-link { float: right; background: rgba(255, 255, 255, 0.2); padding: 0.5rem 1rem; border-radius: 5px; }
+        .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        .back-link { color: #667eea; text-decoration: none; margin-bottom: 2rem; display: inline-block; font-weight: 600; }
+        .back-link:hover { text-decoration: underline; }
+        .alert { padding: 1rem; margin-bottom: 1.5rem; border-radius: 5px; border-left: 4px solid; }
+        .alert.success { background-color: #d4edda; border-color: #28a745; color: #155724; }
+        .alert.error { background-color: #f8d7da; border-color: #dc3545; color: #721c24; }
+        .alert.warning { background-color: #fff3cd; border-color: #ffc107; color: #856404; }
+        .book-details { background: white; border-radius: 8px; padding: 2rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); margin-bottom: 2rem; }
+        .book-details h1 { color: #667eea; margin-bottom: 0.5rem; font-size: 2rem; }
+        .book-details .author { font-style: italic; color: #888; font-size: 1.1rem; margin-bottom: 1rem; }
+        .book-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; padding: 1.5rem; background: #f8f9fa; border-radius: 5px; }
+        .meta-item { display: flex; flex-direction: column; }
+        .meta-item label { font-weight: 600; color: #667eea; font-size: 0.9rem; }
+        .meta-item value { color: #333; margin-top: 0.25rem; }
+        .condition-badge { display: inline-block; background: #fff3cd; padding: 0.5rem 1rem; border-radius: 3px; font-weight: 600; }
+        .category-badge { display: inline-block; background: #e9ecef; padding: 0.5rem 1rem; border-radius: 20px; }
+        .price { font-size: 2rem; font-weight: bold; color: #28a745; margin: 1.5rem 0; }
+        .description { line-height: 1.6; color: #555; margin: 1.5rem 0; padding: 1rem; background: #f8f9fa; border-left: 4px solid #667eea; border-radius: 4px; }
+        .seller-info { background: #f8f9fa; padding: 1.5rem; border-radius: 5px; margin: 1.5rem 0; border-left: 4px solid #667eea; }
+        .seller-info h3 { color: #667eea; margin-bottom: 0.5rem; }
+        .seller-info p { color: #555; margin: 0.5rem 0; }
+        .request-form { background: white; border-radius: 8px; padding: 2rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); margin-top: 2rem; }
+        .request-form h2 { color: #667eea; margin-bottom: 1.5rem; font-size: 1.5rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: #333; }
+        .form-group small { color: #666; font-size: 0.85rem; display: block; margin-top: 0.35rem; }
+        .form-control { width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px; font-family: inherit; font-size: 1rem; background-color: white; }
+        .form-control:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        textarea.form-control { resize: vertical; min-height: 120px; font-family: 'Segoe UI', sans-serif; }
+        .btn { display: inline-block; padding: 0.75rem 1.5rem; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer; text-decoration: none; transition: background-color 0.3s; font-weight: 600; }
+        .btn-primary { background-color: #667eea; color: white; }
+        .btn-primary:hover { background-color: #5568d3; }
+        .btn-primary:disabled { background-color: #ccc; cursor: not-allowed; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        .button-group { display: flex; gap: 1rem; margin-top: 1.5rem; }
+        .button-group .btn { flex: 1; text-align: center; padding: 0.75rem 1rem; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/buyer/books">Browse Books</a>
+        <a href="/buyer/requests">My Requests</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/logout" class="logout-link">Logout</a>
+    </nav>
+
+    <div class="container">
+        <a href="/buyer/books" class="back-link">← Back to Books</a>
+
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+        <div class="book-details">
+            <h1 th:text="${bookListing.book.title}">Book Title</h1>
+            <p class="author">by <span th:text="${bookListing.book.author}">Author</span></p>
+
+            <div class="book-meta">
+                <div class="meta-item" th:if="${bookListing.book.isbn != null}">
+                    <label>ISBN</label>
+                    <value th:text="${bookListing.book.isbn}">-</value>
+                </div>
+                <div class="meta-item" th:if="${bookListing.book.category != null}">
+                    <label>Category</label>
+                    <span class="category-badge" th:text="${bookListing.book.category}">Unknown</span>
+                </div>
+                <div class="meta-item">
+                    <label>Condition</label>
+                    <span class="condition-badge" th:text="${bookListing.book.condition}">Good</span>
+                </div>
+            </div>
+
+            <p class="price">Rs. <span th:text="${bookListing.price}">0</span></p>
+
+            <div th:if="${bookListing.book.description != null}" class="description">
+                <p th:text="${bookListing.book.description}">No description</p>
+            </div>
+
+            <div class="seller-info">
+                <h3>Seller Information</h3>
+                <p><strong>Name:</strong> <span th:text="|${bookListing.seller.firstName} ${bookListing.seller.lastName}|">Unknown</span></p>
+                <p><strong>Email:</strong> <span th:text="${bookListing.seller.email}">no-email@example.com</span></p>
+                <p><strong>Listed on:</strong> <span th:text="${#temporals.format(bookListing.createdAt, 'MMM dd, yyyy')}">Unknown</span></p>
+            </div>
+        </div>
+
+        <div class="request-form">
+            <h2>📮 Request to Exchange This Book</h2>
+
+            <div th:if="${hasPendingRequest != null and hasPendingRequest}" class="alert alert-warning">
+                <strong>⏳ Note:</strong> You already have a pending request for this book. You cannot make another request until the seller responds.
+                <div class="button-group" style="margin-top: 1rem;">
+                    <a href="/buyer/requests" class="btn btn-secondary">View My Requests</a>
+                </div>
+            </div>
+
+            <div th:if="${hasPendingRequest == null or !hasPendingRequest}">
+                <form method="post" th:action="@{/buyer/books/{id}/request(id=${bookListing.id})}">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                    <div class="form-group">
+                        <label for="message"><strong>Message to Seller (Optional)</strong></label>
+                        <textarea id="message" name="message" class="form-control" placeholder="Share your thoughts about the book..."></textarea>
+                        <small>💬 Help the seller understand why you're interested in this book.</small>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">✉️ Send Exchange Request</button>
+                        <a href="/buyer/books" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

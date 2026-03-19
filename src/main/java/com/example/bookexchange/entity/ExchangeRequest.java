@@ -21,7 +21,7 @@ public class ExchangeRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // The book the buyer wants
+    // The book the buyer wants (seller's listing)
     @ManyToOne(optional = false)
     @JoinColumn(name = "listing_id", nullable = false)
     private BookListing listing;
@@ -30,6 +30,7 @@ public class ExchangeRequest {
     @ManyToOne(optional = false)
     @JoinColumn(name = "buyer_id", nullable = false)
     private User buyer;
+
 
     // Optional message from the buyer to the seller
     @Column(length = 1000)

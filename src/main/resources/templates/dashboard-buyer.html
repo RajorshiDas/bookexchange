@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -165,11 +165,15 @@
             text-align: center;
             transition: all 0.3s;
             font-weight: 600;
+            display: inline-block;
+            width: 100%;
         }
 
         .action-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+            text-decoration: none;
         }
 
         .welcome-message {
@@ -215,47 +219,43 @@
 
         <div class="dashboard-grid">
             <div class="card">
-                <div class="card-icon">🛒</div>
-                <h3>Purchase Orders</h3>
-                <p>Books you've ordered</p>
-                <div class="card-value">0</div>
-                <a href="#" class="card-link">View Orders →</a>
+                <div class="card-icon">📚</div>
+                <h3>Browse Books</h3>
+                <p>View all available books for exchange</p>
+                <a href="/buyer/books" class="card-link" style="font-size: 1.1rem;">Browse Now →</a>
             </div>
 
             <div class="card">
-                <div class="card-icon">💗</div>
-                <h3>Wishlist</h3>
-                <p>Books you're interested in</p>
-                <div class="card-value">0</div>
-                <a href="#" class="card-link">View Wishlist →</a>
+                <div class="card-icon">📋</div>
+                <h3>Exchange Requests</h3>
+                <p>Track your exchange requests</p>
+                <div class="card-value" th:text="${pendingCount ?: 0}"></div>
+                <a href="/buyer/requests" class="card-link">View Requests →</a>
             </div>
 
             <div class="card">
-                <div class="card-icon">⭐</div>
-                <h3>Reviews</h3>
-                <p>Your book reviews and ratings</p>
-                <div class="card-value">0</div>
-                <a href="#" class="card-link">View Reviews →</a>
+                <div class="card-icon">✅</div>
+                <h3>Accepted</h3>
+                <p>Accepted exchange requests</p>
+                <div class="card-value" th:text="${acceptedCount ?: 0}"></div>
+                <a href="/buyer/requests" class="card-link">View →</a>
             </div>
 
             <div class="card">
-                <div class="card-icon">💰</div>
-                <h3>My Wallet</h3>
-                <p>Account balance and transactions</p>
-                <div class="card-value">$0.00</div>
-                <a href="#" class="card-link">View Wallet →</a>
+                <div class="card-icon">⏳</div>
+                <h3>Pending</h3>
+                <p>Awaiting seller response</p>
+                <div class="card-value" th:text="${pendingCount ?: 0}"></div>
+                <a href="/buyer/requests" class="card-link">View →</a>
             </div>
         </div>
 
         <div class="action-section">
             <h2>Quick Actions</h2>
             <div class="action-buttons">
-                <button class="action-btn">🔍 Browse Books</button>
-                <button class="action-btn">🛒 Shopping Cart</button>
-                <button class="action-btn">📦 Track Orders</button>
-                <button class="action-btn">💬 Contact Seller</button>
-                <button class="action-btn">⭐ Leave Review</button>
-                <button class="action-btn">⚙️ Account Settings</button>
+                <a href="/buyer/books" class="action-btn">🔍 Browse All Books</a>
+                <a href="/buyer/requests" class="action-btn">📦 My Exchange Requests</a>
+                <a href="/dashboard" class="action-btn">⚙️ Back to Dashboard</a>
             </div>
         </div>
 

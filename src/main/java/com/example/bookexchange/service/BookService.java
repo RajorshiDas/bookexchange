@@ -216,4 +216,14 @@ public class BookService {
     public Optional<Book> getBookById(Long id) {
         return bookRepository.findById(id);
     }
+
+    /**
+     * Get the BookListingRepository for accessing book listing queries.
+     * This is used by controllers and other services to query listings.
+     *
+     * @return The BookListingRepository
+     */
+    public BookListingRepository getBookListingRepository() {
+        return bookListingRepository;
+    }
 }
