@@ -110,7 +110,6 @@
 
             <div th:if="${hasPendingRequest == null or !hasPendingRequest}">
                 <form method="post" th:action="@{/buyer/books/{id}/request(id=${bookListing.id})}">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
                     <div class="form-group">
                         <label for="message"><strong>Message to Seller (Optional)</strong></label>

@@ -6,6 +6,8 @@ import com.example.bookexchange.entity.BookListing;
 import com.example.bookexchange.entity.User;
 import com.example.bookexchange.repository.UserRepository;
 import com.example.bookexchange.service.BookService;
+import com.example.bookexchange.service.ExchangeRequestService;
+import com.example.bookexchange.entity.ExchangeRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -27,6 +30,9 @@ public class SellerController {
 
     @Autowired
     private BookService bookService;
+
+    @Autowired
+    private ExchangeRequestService exchangeRequestService;
 
     @Autowired
     private UserRepository userRepository;
@@ -222,6 +228,207 @@ public class SellerController {
             return "redirect:/seller/books?error=Unauthorized access";
         } catch (Exception e) {
             return "redirect:/seller/books?error=" + e.getMessage();
+        }
+    }
+
+    /**
+     * GET /seller/requests
+     * Display all exchange requests for the seller's books.
+     * Sellers can see all pending, accepted, and rejected requests.
+     */
+    @GetMapping("/requests")
+    public String viewRequests(Model model, Authentication authentication) {
+        try {
+            User seller = getCurrentUser(authentication);
+
+            // Get all requests for this seller's books
+            List<ExchangeRequest> allRequests = exchangeRequestService.getRequestsForSeller(seller);
+
+            // Separate by status for easier display
+            List<ExchangeRequest> pendingRequests = allRequests.stream()
+                    .filter(req -> req.getStatus().name().equals("PENDING"))
+                    .toList();
+            List<ExchangeRequest> acceptedRequests = allRequests.stream()
+                    .filter(req -> req.getStatus().name().equals("ACCEPTED"))
+                    .toList();
+            List<ExchangeRequest> rejectedRequests = allRequests.stream()
+                    .filter(req -> req.getStatus().name().equals("REJECTED"))
+                    .toList();
+
+            model.addAttribute("allRequests", allRequests);
+            model.addAttribute("pendingRequests", pendingRequests);
+            model.addAttribute("acceptedRequests", acceptedRequests);
+            model.addAttribute("rejectedRequests", rejectedRequests);
+            model.addAttribute("seller", seller);
+
+            return "seller-requests-list";
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            return "redirect:/seller/books";
+        }
+    }
+
+    /**
+     * GET /seller/requests/{id}
+     * Display details of a specific exchange request.
+     * Shows book details, buyer information, and request message.
+     */
+    @GetMapping("/requests/{id}")
+    public String viewRequestDetails(@PathVariable Long id, Model model, Authentication authentication) {
+        try {
+            User seller = getCurrentUser(authentication);
+
+            // Get the exchange request
+            Optional<ExchangeRequest> request = exchangeRequestService.getExchangeRequestById(id);
+            if (request.isEmpty()) {
+                return "redirect:/seller/requests?error=Request not found";
+            }
+
+            // Verify that the seller owns this listing
+            if (!request.get().getListing().getSeller().getId().equals(seller.getId())) {
+                return "redirect:/seller/requests?error=Unauthorized access";
+            }
+
+            model.addAttribute("request", request.get());
+            model.addAttribute("seller", seller);
+
+            return "seller-request-details";
+        } catch (Exception e) {
+            return "redirect:/seller/requests?error=" + e.getMessage();
+        }
+    }
+
+    /**
+     * POST /seller/requests/{id}/accept
+     * Accept an exchange request from a buyer.
+     * Updates the request status to ACCEPTED.
+     */
+    @PostMapping("/requests/{id}/accept")
+    public String acceptRequest(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes,
+            Authentication authentication) {
+        try {
+            User seller = getCurrentUser(authentication);
+
+            // Get the exchange request
+            Optional<ExchangeRequest> request = exchangeRequestService.getExchangeRequestById(id);
+            if (request.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Request not found");
+                return "redirect:/seller/requests";
+            }
+
+            // Verify that the seller owns this listing
+            if (!request.get().getListing().getSeller().getId().equals(seller.getId())) {
+                redirectAttributes.addFlashAttribute("error", "Unauthorized access");
+                return "redirect:/seller/requests";
+            }
+
+            // Accept the request
+            exchangeRequestService.acceptExchangeRequest(id, seller);
+
+            redirectAttributes.addFlashAttribute("success",
+                    "Exchange request accepted! You can now proceed with the exchange.");
+            return "redirect:/seller/requests";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/seller/requests/" + id;
+        }
+    }
+
+    /**
+     * POST /seller/requests/{id}/reject
+     * Reject an exchange request from a buyer.
+     * Updates the request status to REJECTED.
+     */
+    @PostMapping("/requests/{id}/reject")
+    public String rejectRequest(
+            @PathVariable Long id,
+            @RequestParam(required = false) String reason,
+            RedirectAttributes redirectAttributes,
+            Authentication authentication) {
+        try {
+            User seller = getCurrentUser(authentication);
+
+            // Get the exchange request
+            Optional<ExchangeRequest> request = exchangeRequestService.getExchangeRequestById(id);
+            if (request.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Request not found");
+                return "redirect:/seller/requests";
+            }
+
+            // Verify that the seller owns this listing
+            if (!request.get().getListing().getSeller().getId().equals(seller.getId())) {
+                redirectAttributes.addFlashAttribute("error", "Unauthorized access");
+                return "redirect:/seller/requests";
+            }
+
+            // Reject the request
+            exchangeRequestService.rejectExchangeRequest(id, seller);
+
+            redirectAttributes.addFlashAttribute("success", "Exchange request rejected.");
+            return "redirect:/seller/requests";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/seller/requests/" + id;
+        }
+    }
+
+    /**
+     * GET /seller/requests/{id}/confirm-accept
+     * Display confirmation page before accepting a request.
+     */
+    @GetMapping("/requests/{id}/confirm-accept")
+    public String showAcceptConfirmation(@PathVariable Long id, Model model, Authentication authentication) {
+        try {
+            User seller = getCurrentUser(authentication);
+
+            // Get the exchange request
+            Optional<ExchangeRequest> request = exchangeRequestService.getExchangeRequestById(id);
+            if (request.isEmpty()) {
+                return "redirect:/seller/requests?error=Request not found";
+            }
+
+            // Verify that the seller owns this listing
+            if (!request.get().getListing().getSeller().getId().equals(seller.getId())) {
+                return "redirect:/seller/requests?error=Unauthorized access";
+            }
+
+            model.addAttribute("request", request.get());
+            model.addAttribute("seller", seller);
+
+            return "seller-request-accept-confirm";
+        } catch (Exception e) {
+            return "redirect:/seller/requests?error=" + e.getMessage();
+        }
+    }
+
+    /**
+     * GET /seller/requests/{id}/confirm-reject
+     * Display confirmation page before rejecting a request.
+     */
+    @GetMapping("/requests/{id}/confirm-reject")
+    public String showRejectConfirmation(@PathVariable Long id, Model model, Authentication authentication) {
+        try {
+            User seller = getCurrentUser(authentication);
+
+            // Get the exchange request
+            Optional<ExchangeRequest> request = exchangeRequestService.getExchangeRequestById(id);
+            if (request.isEmpty()) {
+                return "redirect:/seller/requests?error=Request not found";
+            }
+
+            // Verify that the seller owns this listing
+            if (!request.get().getListing().getSeller().getId().equals(seller.getId())) {
+                return "redirect:/seller/requests?error=Unauthorized access";
+            }
+
+            model.addAttribute("request", request.get());
+            model.addAttribute("seller", seller);
+
+            return "seller-request-reject-confirm";
+        } catch (Exception e) {
+            return "redirect:/seller/requests?error=" + e.getMessage();
         }
     }
 }
