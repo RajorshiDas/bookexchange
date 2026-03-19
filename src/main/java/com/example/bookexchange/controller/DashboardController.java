@@ -3,6 +3,7 @@ package com.example.bookexchange.controller;
 import com.example.bookexchange.entity.User;
 import com.example.bookexchange.repository.UserRepository;
 import com.example.bookexchange.service.AuthService;
+import com.example.bookexchange.service.BookService;
 import com.example.bookexchange.service.ExchangeRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -24,6 +25,9 @@ public class DashboardController {
 
     @Autowired
     private ExchangeRequestService exchangeRequestService;
+
+    @Autowired
+    private BookService bookService;
 
     // Constructor injection
     public DashboardController(AuthService authService) {
@@ -87,6 +91,22 @@ public class DashboardController {
     public String sellerDashboard(Model model, Authentication authentication) {
         addUserToModel(model, authentication);
         model.addAttribute("role", "SELLER");
+
+        // Add book count for seller
+        if (authentication != null) {
+            Optional<User> userOpt = userRepository.findByUsername(authentication.getName());
+            if (userOpt.isPresent()) {
+                User seller = userOpt.get();
+                long bookCount = bookService.getSellerBooks(seller).size();
+                long pendingRequestCount = bookService.getSellerBooks(seller).stream()
+                        .flatMap(listing -> exchangeRequestService.getRequestsForSeller(seller).stream()
+                                .filter(req -> req.getListing().getId().equals(listing.getId()) && req.getStatus().name().equals("PENDING")))
+                        .count();
+                model.addAttribute("bookCount", bookCount);
+                model.addAttribute("pendingRequestCount", pendingRequestCount);
+            }
+        }
+
         return "dashboard-seller";
     }
 
