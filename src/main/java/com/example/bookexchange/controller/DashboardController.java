@@ -1,7 +1,10 @@
 package com.example.bookexchange.controller;
 
 import com.example.bookexchange.entity.User;
+import com.example.bookexchange.repository.UserRepository;
 import com.example.bookexchange.service.AuthService;
+import com.example.bookexchange.service.ExchangeRequestService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +18,12 @@ import java.util.Optional;
 public class DashboardController {
 
     private final AuthService authService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ExchangeRequestService exchangeRequestService;
 
     // Constructor injection
     public DashboardController(AuthService authService) {
@@ -53,6 +62,21 @@ public class DashboardController {
     public String buyerDashboard(Model model, Authentication authentication) {
         addUserToModel(model, authentication);
         model.addAttribute("role", "BUYER");
+
+        // Add exchange request counts
+        if (authentication != null) {
+            Optional<User> userOpt = userRepository.findByUsername(authentication.getName());
+            if (userOpt.isPresent()) {
+                User buyer = userOpt.get();
+                long pendingCount = exchangeRequestService.getPendingRequestCountForBuyer(buyer);
+                long acceptedCount = exchangeRequestService.getRequestsByBuyer(buyer).stream()
+                        .filter(req -> req.getStatus().name().equals("ACCEPTED"))
+                        .count();
+                model.addAttribute("pendingCount", pendingCount);
+                model.addAttribute("acceptedCount", acceptedCount);
+            }
+        }
+
         return "dashboard-buyer";
     }
 

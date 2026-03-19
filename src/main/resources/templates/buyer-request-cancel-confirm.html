@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancel Request - Book Exchange</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        /* Navbar Styles */
+        nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            margin-right: 2rem;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
+        }
+
+        .logout-link {
+            float: right;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+
+        /* Container Styles */
+        .container {
+            max-width: 600px;
+            margin: 4rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Confirmation Card */
+        .confirmation-card {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .confirmation-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #dc3545;
+        }
+
+        .confirmation-card h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .confirmation-card p {
+            color: #666;
+            margin: 1rem 0;
+            line-height: 1.6;
+        }
+
+        /* Request Details */
+        .request-details {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 5px;
+            margin: 1.5rem 0;
+            text-align: left;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.75rem 0;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .detail-value {
+            color: #555;
+        }
+
+        /* Warning Message */
+        .warning-message {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 5px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            color: #856404;
+        }
+
+        .warning-message strong {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Button Group */
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            display: inline-block;
+            min-width: 120px;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/buyer/books">Browse Books</a>
+        <a href="/buyer/requests">My Requests</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/logout" class="logout-link">Logout</a>
+    </nav>
+
+    <div class="container">
+        <div class="confirmation-card">
+            <div class="confirmation-icon">⚠️</div>
+
+            <h1>Cancel Exchange Request?</h1>
+            <p>Are you sure you want to cancel this exchange request?</p>
+
+            <!-- Request Details -->
+            <div class="request-details">
+                <div class="detail-item">
+                    <span class="detail-label">Book Title</span>
+                    <span class="detail-value" th:text="${request.listing.book.title}"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Author</span>
+                    <span class="detail-value" th:text="${request.listing.book.author}"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Seller</span>
+                    <span class="detail-value" th:text="${request.listing.seller.firstName + ' ' + request.listing.seller.lastName}"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Price</span>
+                    <span class="detail-value">Rs. <span th:text="${request.listing.price}"></span></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Requested On</span>
+                    <span class="detail-value" th:text="${#dates.format(request.createdAt, 'MMM dd, yyyy')}"></span>
+                </div>
+            </div>
+
+            <!-- Warning Message -->
+            <div class="warning-message">
+                <strong>⚠️ Warning</strong>
+                Once you cancel this request, it cannot be undone. You can always create a new request for the same book later.
+            </div>
+
+            <p style="color: #666; font-size: 0.9rem;">
+                This action will change your request status from <strong>PENDING</strong> to <strong>CANCELLED</strong>.
+            </p>
+
+            <!-- Action Buttons -->
+            <div class="button-group">
+                <form method="post" th:action="@{/buyer/requests/{id}/cancel(id=${request.id})}" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Yes, Cancel Request</button>
+                </form>
+                <a href="/buyer/requests" class="btn btn-secondary">No, Go Back</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

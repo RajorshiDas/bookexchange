@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Exchange Requests - Book Exchange</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        /* Navbar Styles */
+        nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            margin-right: 2rem;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
+        }
+
+        .logout-link {
+            float: right;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+
+        /* Container Styles */
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        h1 {
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        /* Alert/Message Styles */
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 5px;
+            border-left: 4px solid;
+        }
+
+        .alert.success {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .alert.error {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab-button {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-button:hover {
+            color: #667eea;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Request Cards */
+        .request-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .request-card.pending {
+            border-left-color: #ffc107;
+        }
+
+        .request-card.accepted {
+            border-left-color: #28a745;
+        }
+
+        .request-card.rejected {
+            border-left-color: #dc3545;
+        }
+
+        .request-card.cancelled {
+            border-left-color: #6c757d;
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .request-header h3 {
+            color: #667eea;
+            margin-bottom: 0.25rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .status-badge.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.accepted {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-badge.cancelled {
+            background: #e9ecef;
+            color: #383d41;
+        }
+
+        .request-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-item label {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+
+        .detail-item value {
+            color: #555;
+            margin-top: 0.25rem;
+        }
+
+        .request-message {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            border-left: 3px solid #667eea;
+        }
+
+        .request-message p {
+            color: #555;
+            font-style: italic;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #5568d3;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-state p {
+            color: #999;
+            margin: 0.5rem 0;
+        }
+
+        .empty-state a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .empty-state a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/buyer/books">Browse Books</a>
+        <a href="/buyer/requests">My Requests</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/logout" class="logout-link">Logout</a>
+    </nav>
+
+    <div class="container">
+        <h1>My Exchange Requests</h1>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('pending', this)">
+                Pending (<span th:text="${pendingRequests.size()}"></span>)
+            </button>
+            <button class="tab-button" onclick="switchTab('accepted', this)">
+                Accepted (<span th:text="${acceptedRequests.size()}"></span>)
+            </button>
+            <button class="tab-button" onclick="switchTab('rejected', this)">
+                Rejected (<span th:text="${rejectedRequests.size()}"></span>)
+            </button>
+            <button class="tab-button" onclick="switchTab('cancelled', this)">
+                Cancelled (<span th:text="${cancelledRequests.size()}"></span>)
+            </button>
+        </div>
+
+        <!-- Pending Requests -->
+        <div id="pending" class="tab-content active">
+            <div th:if="${pendingRequests.size() > 0}">
+                <div th:each="request : ${pendingRequests}" class="request-card pending">
+                    <div class="request-header">
+                        <div>
+                            <h3 th:text="${request.listing.book.title}"></h3>
+                            <p style="color: #666; font-size: 0.9rem;">
+                                by <span th:text="${request.listing.book.author}"></span>
+                            </p>
+                        </div>
+                        <span class="status-badge pending">PENDING</span>
+                    </div>
+
+                    <div class="request-details">
+                        <div class="detail-item">
+                            <label>Seller</label>
+                            <value th:text="|${request.listing.seller.firstName} ${request.listing.seller.lastName}|"></value>
+                        </div>
+                        <div class="detail-item">
+                            <label>Requested On</label>
+                            <value th:text="${#temporals.format(request.createdAt, 'MMM dd, yyyy')}"></value>
+                        </div>
+                        <div class="detail-item">
+                            <label>Price</label>
+                            <value>Rs. <span th:text="${request.listing.price}"></span></value>
+                        </div>
+                    </div>
+
+                    <!-- Message -->
+                    <div th:if="${request.message != null}" class="request-message">
+                        <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Your Message:</label>
+                        <p th:text="${request.message}"></p>
+                    </div>
+
+                    <div class="button-group">
+                        <a th:href="@{/buyer/requests/{id}(id=${request.id})}" class="btn btn-info">View Details</a>
+                        <a th:href="@{/buyer/requests/{id}/confirm-cancel(id=${request.id})}" class="btn btn-danger">Cancel Request</a>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${pendingRequests.size() == 0}" class="empty-state">
+                <p>You don't have any pending requests.</p>
+                <p><a href="/buyer/books">Browse books to make a request</a></p>
+            </div>
+        </div>
+
+        <!-- Accepted Requests -->
+        <div id="accepted" class="tab-content">
+            <div th:if="${acceptedRequests.size() > 0}">
+                <div th:each="request : ${acceptedRequests}" class="request-card accepted">
+                    <div class="request-header">
+                        <div>
+                            <h3 th:text="${request.listing.book.title}"></h3>
+                            <p style="color: #666; font-size: 0.9rem;">
+                                by <span th:text="${request.listing.book.author}"></span>
+                            </p>
+                        </div>
+                        <span class="status-badge accepted">ACCEPTED</span>
+                    </div>
+
+                    <div class="request-details">
+                        <div class="detail-item">
+                            <label>Seller</label>
+                            <value th:text="|${request.listing.seller.firstName} ${request.listing.seller.lastName}|"></value>
+                        </div>
+                        <div class="detail-item">
+                            <label>Requested On</label>
+                            <value th:text="${#temporals.format(request.createdAt, 'MMM dd, yyyy')}"></value>
+                        </div>
+                        <div class="detail-item">
+                            <label>Price</label>
+                            <value>Rs. <span th:text="${request.listing.price}"></span></value>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <a th:href="@{/buyer/requests/{id}(id=${request.id})}" class="btn btn-info">View Details</a>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${acceptedRequests.size() == 0}" class="empty-state">
+                <p>You don't have any accepted requests yet.</p>
+            </div>
+        </div>
+
+        <!-- Rejected Requests -->
+        <div id="rejected" class="tab-content">
+            <div th:if="${rejectedRequests.size() > 0}">
+                <div th:each="request : ${rejectedRequests}" class="request-card rejected">
+                    <div class="request-header">
+                        <div>
+                            <h3 th:text="${request.listing.book.title}"></h3>
+                            <p style="color: #666; font-size: 0.9rem;">
+                                by <span th:text="${request.listing.book.author}"></span>
+                            </p>
+                        </div>
+                        <span class="status-badge rejected">REJECTED</span>
+                    </div>
+
+                    <div class="request-details">
+                        <div class="detail-item">
+                            <label>Seller</label>
+                            <value th:text="|${request.listing.seller.firstName} ${request.listing.seller.lastName}|"></value>
+                        </div>
+                        <div class="detail-item">
+                            <label>Requested On</label>
+                            <value th:text="${#temporals.format(request.createdAt, 'MMM dd, yyyy')}"></value>
+                        </div>
+                        <div class="detail-item">
+                            <label>Price</label>
+                            <value>Rs. <span th:text="${request.listing.price}"></span></value>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <a th:href="@{/buyer/requests/{id}(id=${request.id})}" class="btn btn-info">View Details</a>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${rejectedRequests.size() == 0}" class="empty-state">
+                <p>You don't have any rejected requests.</p>
+            </div>
+        </div>
+
+        <!-- Cancelled Requests -->
+        <div id="cancelled" class="tab-content">
+            <div th:if="${cancelledRequests.size() > 0}">
+                <div th:each="request : ${cancelledRequests}" class="request-card cancelled">
+                    <div class="request-header">
+                        <div>
+                            <h3 th:text="${request.listing.book.title}"></h3>
+                            <p style="color: #666; font-size: 0.9rem;">
+                                by <span th:text="${request.listing.book.author}"></span>
+                            </p>
+                        </div>
+                        <span class="status-badge cancelled">CANCELLED</span>
+                    </div>
+
+                    <div class="request-details">
+                        <div class="detail-item">
+                            <label>Seller</label>
+                            <value th:text="|${request.listing.seller.firstName} ${request.listing.seller.lastName}|"></value>
+                        </div>
+                        <div class="detail-item">
+                            <label>Requested On</label>
+                            <value th:text="${#temporals.format(request.createdAt, 'MMM dd, yyyy')}"></value>
+                        </div>
+                        <div class="detail-item">
+                            <label>Price</label>
+                            <value>Rs. <span th:text="${request.listing.price}"></span></value>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <a th:href="@{/buyer/requests/{id}(id=${request.id})}" class="btn btn-info">View Details</a>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${cancelledRequests.size() == 0}" class="empty-state">
+                <p>You don't have any cancelled requests.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName, buttonElement) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked button
+            buttonElement.classList.add('active');
+        }
+    </script>
+</body>
+</html>
