@@ -164,7 +164,9 @@
         <a href="/buyer/books">Browse Books</a>
         <a href="/buyer/requests">My Requests</a>
         <a href="/dashboard">Dashboard</a>
-        <a href="/logout" class="logout-link">Logout</a>
+        <form th:action="@{/auth/logout}" method="post" style="display:inline;">
+            <button type="submit" class="logout-link" style="background: none; border: none; padding: 0.5rem 1rem; cursor: pointer; color: white; font-weight: 600;">Logout</button>
+        </form>
     </nav>
 
     <div class="container">
@@ -194,7 +196,7 @@
                 </div>
                 <div class="detail-item">
                     <span class="detail-label">Requested On</span>
-                    <span class="detail-value" th:text="${#dates.format(request.createdAt, 'MMM dd, yyyy')}"></span>
+                    <span class="detail-value" th:text="${#temporals.format(request.createdAt, 'MMM dd, yyyy')}"></span>
                 </div>
             </div>
 
