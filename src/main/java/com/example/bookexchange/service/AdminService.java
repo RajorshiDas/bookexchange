@@ -1,11 +1,16 @@
 package com.example.bookexchange.service;
 
 import com.example.bookexchange.dto.AdminDashboardMetrics;
+import com.example.bookexchange.entity.BookListing;
+import com.example.bookexchange.entity.ExchangeRequest;
 import com.example.bookexchange.entity.RequestStatus;
+import com.example.bookexchange.entity.User;
 import com.example.bookexchange.repository.BookListingRepository;
 import com.example.bookexchange.repository.ExchangeRequestRepository;
 import com.example.bookexchange.repository.UserRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class AdminService {
@@ -29,5 +34,16 @@ public class AdminService {
 
         return new AdminDashboardMetrics(totalUsers, totalListings, totalRequests, pendingRequests);
     }
-}
 
+    public List<User> getRecentUsers() {
+        return userRepository.findTop5ByOrderByIdDesc();
+    }
+
+    public List<BookListing> getRecentListings() {
+        return bookListingRepository.findTop5ByOrderByCreatedAtDesc();
+    }
+
+    public List<ExchangeRequest> getRecentRequests() {
+        return exchangeRequestRepository.findTop5ByOrderByCreatedAtDesc();
+    }
+}

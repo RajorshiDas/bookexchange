@@ -8,6 +8,7 @@ import com.example.bookexchange.repository.BookListingRepository;
 import com.example.bookexchange.repository.ExchangeRequestRepository;
 import com.example.bookexchange.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -288,5 +289,14 @@ public class ExchangeRequestService {
         return getRequestsByBuyer(buyer).stream()
                 .filter(req -> req.getStatus().equals(RequestStatus.PENDING))
                 .toList();
+    }
+
+    /**
+     * Get all exchange requests ordered by most recent.
+     *
+     * @return List of all exchange requests, sorted by creation date descending
+     */
+    public List<ExchangeRequest> getAllRequests() {
+        return exchangeRequestRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
     }
 }

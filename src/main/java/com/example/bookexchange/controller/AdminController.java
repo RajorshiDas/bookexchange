@@ -7,6 +7,8 @@ import com.example.bookexchange.repository.UserRepository;
 import com.example.bookexchange.entity.BookListing;
 import com.example.bookexchange.service.AdminBookService;
 import com.example.bookexchange.entity.ListingStatus;
+import com.example.bookexchange.entity.ExchangeRequest;
+import com.example.bookexchange.service.ExchangeRequestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,11 +26,13 @@ public class AdminController {
     private final UserRepository userRepository;
     private final AuthService authService;
     private final AdminBookService adminBookService;
+    private final ExchangeRequestService exchangeRequestService;
 
-    public AdminController(UserRepository userRepository, AuthService authService, AdminBookService adminBookService) {
+    public AdminController(UserRepository userRepository, AuthService authService, AdminBookService adminBookService, ExchangeRequestService exchangeRequestService) {
         this.userRepository = userRepository;
         this.authService = authService;
         this.adminBookService = adminBookService;
+        this.exchangeRequestService = exchangeRequestService;
     }
 
     @GetMapping("/users")
@@ -120,6 +124,14 @@ public class AdminController {
             adminBookService.updateStatusIfAllowed(id, newStatus);
         }
         return "redirect:/admin/books";
+    }
+
+    @GetMapping("/requests")
+    public String listRequests(Model model, org.springframework.security.core.Authentication authentication) {
+        addUserToModel(model, authentication);
+        List<ExchangeRequest> requests = exchangeRequestService.getAllRequests();
+        model.addAttribute("requests", requests);
+        return "admin-requests";
     }
 
     private void addUserToModel(Model model, org.springframework.security.core.Authentication authentication) {

@@ -18,5 +18,6 @@ public interface BookListingRepository extends JpaRepository<BookListing, Long> 
     List<BookListing> findByBook_TitleContainingIgnoreCase(String title);
 
     List<BookListing> findByBook_AuthorContainingIgnoreCase(String author);
-}
 
+    List<BookListing> findTop5ByOrderByCreatedAtDesc();
+}

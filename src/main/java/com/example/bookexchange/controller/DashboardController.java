@@ -66,6 +66,9 @@ public class DashboardController {
         model.addAttribute("totalListings", metrics.getTotalListings());
         model.addAttribute("totalRequests", metrics.getTotalRequests());
         model.addAttribute("pendingRequests", metrics.getPendingRequests());
+        model.addAttribute("recentUsers", adminService.getRecentUsers());
+        model.addAttribute("recentListings", adminService.getRecentListings());
+        model.addAttribute("recentRequests", adminService.getRecentRequests());
         return "dashboard-admin";
     }
 
