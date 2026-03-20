@@ -218,32 +218,32 @@
                 <div class="card-icon">👥</div>
                 <h3>Total Users</h3>
                 <p>Active users on the platform</p>
-                <div class="card-value">0</div>
-                <a href="#" class="card-link">View All Users →</a>
+                <div class="card-value" th:text="${totalUsers}">0</div>
+                <a th:href="@{/admin/users}" class="card-link">View All Users →</a>
             </div>
 
             <div class="card">
                 <div class="card-icon">📖</div>
                 <h3>Total Books Listed</h3>
                 <p>Books currently available</p>
-                <div class="card-value">0</div>
-                <a href="#" class="card-link">Manage Books →</a>
+                <div class="card-value" th:text="${totalListings}">0</div>
+                <a th:href="@{/admin/books}" class="card-link">Manage Books →</a>
             </div>
 
             <div class="card">
-                <div class="card-icon">💰</div>
-                <h3>Total Transactions</h3>
-                <p>Completed sales and exchanges</p>
-                <div class="card-value">0</div>
-                <a href="#" class="card-link">View Transactions →</a>
+                <div class="card-icon">🔄</div>
+                <h3>Total Exchange Requests</h3>
+                <p>Requests created on the platform</p>
+                <div class="card-value" th:text="${totalRequests}">0</div>
+                <a href="#" class="card-link">View Requests →</a>
             </div>
 
             <div class="card">
                 <div class="card-icon">⚠️</div>
-                <h3>Reports</h3>
-                <p>User reports and issues</p>
-                <div class="card-value">0</div>
-                <a href="#" class="card-link">View Reports →</a>
+                <h3>Pending Requests</h3>
+                <p>Requests awaiting seller action</p>
+                <div class="card-value" th:text="${pendingRequests}">0</div>
+                <a href="#" class="card-link">View Requests →</a>
             </div>
         </div>
 

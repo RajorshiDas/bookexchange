@@ -1,7 +1,9 @@
 package com.example.bookexchange.controller;
 
+import com.example.bookexchange.dto.AdminDashboardMetrics;
 import com.example.bookexchange.entity.User;
 import com.example.bookexchange.repository.UserRepository;
+import com.example.bookexchange.service.AdminService;
 import com.example.bookexchange.service.AuthService;
 import com.example.bookexchange.service.BookService;
 import com.example.bookexchange.service.ExchangeRequestService;
@@ -28,6 +30,9 @@ public class DashboardController {
 
     @Autowired
     private BookService bookService;
+
+    @Autowired
+    private AdminService adminService;
 
     // Constructor injection
     public DashboardController(AuthService authService) {
@@ -56,6 +61,11 @@ public class DashboardController {
     public String adminDashboard(Model model, Authentication authentication) {
         addUserToModel(model, authentication);
         model.addAttribute("role", "ADMIN");
+        AdminDashboardMetrics metrics = adminService.getDashboardMetrics();
+        model.addAttribute("totalUsers", metrics.getTotalUsers());
+        model.addAttribute("totalListings", metrics.getTotalListings());
+        model.addAttribute("totalRequests", metrics.getTotalRequests());
+        model.addAttribute("pendingRequests", metrics.getPendingRequests());
         return "dashboard-admin";
     }
 
