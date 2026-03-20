@@ -6,4 +6,3 @@ public enum ListingStatus {
     EXCHANGED,
     SOLD
 }
-

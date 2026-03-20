@@ -19,4 +19,9 @@ public interface ExchangeRequestRepository extends JpaRepository<ExchangeRequest
 
     // All requests filtered by status
     List<ExchangeRequest> findByStatus(RequestStatus status);
+
+    // Count of requests filtered by status (for admin metrics)
+    long countByStatus(RequestStatus status);
+
+    List<ExchangeRequest> findTop5ByOrderByCreatedAtDesc();
 }

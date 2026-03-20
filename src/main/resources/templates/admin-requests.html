@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Requests - Book Exchange</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .header {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+        }
+
+        .back-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .table-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.75rem 0.5rem;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        th {
+            color: #333;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #fafafa;
+        }
+
+        .empty-state {
+            color: #999;
+            padding: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">📚 BookExchange</div>
+        <div class="navbar-right">
+            <span th:if="${firstName}" th:text="'Hello, ' + ${firstName} + '!'" style="font-size:0.95rem; opacity:0.9;"></span>
+            <form th:action="@{/auth/logout}" method="post" style="display:inline;">
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>Exchange Requests</h1>
+            <a th:href="@{/dashboard/admin}" class="back-link">← Back to Dashboard</a>
+        </div>
+
+        <div class="table-card">
+            <table th:if="${requests} and ${#lists.size(requests)} > 0">
+                <thead>
+                    <tr>
+                        <th>Buyer</th>
+                        <th>Seller</th>
+                        <th>Book</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="req : ${requests}">
+                        <td th:text="${req.buyer.username}">buyer</td>
+                        <td th:text="${req.listing.seller.username}">seller</td>
+                        <td th:text="${req.listing.book.title}">book</td>
+                        <td th:text="${req.status}">status</td>
+                        <td th:text="${#temporals.format(req.createdAt, 'yyyy-MM-dd HH:mm')}">date</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="empty-state" th:if="${requests} == null or ${#lists.size(requests)} == 0">No exchange requests found.</p>
+        </div>
+    </div>
+</body>
+</html>
+

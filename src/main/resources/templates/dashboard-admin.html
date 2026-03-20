@@ -65,6 +65,42 @@
             padding: 0 2rem;
         }
 
+        .layout {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            height: fit-content;
+        }
+
+        .sidebar h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 0;
+            transition: color 0.2s;
+        }
+
+        .sidebar a:hover {
+            color: #764ba2;
+        }
+
+        .main-content {
+            flex: 1;
+        }
+
         .header {
             margin-bottom: 2rem;
         }
@@ -213,55 +249,88 @@
             <p>Key statistics and management tools</p>
         </div>
 
-        <div class="dashboard-grid">
-            <div class="card">
-                <div class="card-icon">👥</div>
-                <h3>Total Users</h3>
-                <p>Active users on the platform</p>
-                <div class="card-value">0</div>
-                <a href="#" class="card-link">View All Users →</a>
-            </div>
+        <div class="layout">
+            <aside class="sidebar">
+                <h3>Admin</h3>
+                <a th:href="@{/dashboard/admin}">Dashboard</a>
+                <a th:href="@{/admin/users}">Users</a>
+                <a th:href="@{/admin/books}">Books</a>
+                <a th:href="@{/admin/requests}">Requests</a>
+                <a href="#">Reports</a>
+                <a href="#">Settings</a>
+            </aside>
 
-            <div class="card">
-                <div class="card-icon">📖</div>
-                <h3>Total Books Listed</h3>
-                <p>Books currently available</p>
-                <div class="card-value">0</div>
-                <a href="#" class="card-link">Manage Books →</a>
-            </div>
+            <div class="container main-content">
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <div class="card-icon">👥</div>
+                        <h3>Total Users</h3>
+                        <p>Active users on the platform</p>
+                        <div class="card-value" th:text="${totalUsers}">0</div>
+                        <a th:href="@{/admin/users}" class="card-link">View All Users →</a>
+                    </div>
 
-            <div class="card">
-                <div class="card-icon">💰</div>
-                <h3>Total Transactions</h3>
-                <p>Completed sales and exchanges</p>
-                <div class="card-value">0</div>
-                <a href="#" class="card-link">View Transactions →</a>
-            </div>
+                    <div class="card">
+                        <div class="card-icon">📖</div>
+                        <h3>Total Books Listed</h3>
+                        <p>Books currently available</p>
+                        <div class="card-value" th:text="${totalListings}">0</div>
+                        <a th:href="@{/admin/books}" class="card-link">Manage Books →</a>
+                    </div>
 
-            <div class="card">
-                <div class="card-icon">⚠️</div>
-                <h3>Reports</h3>
-                <p>User reports and issues</p>
-                <div class="card-value">0</div>
-                <a href="#" class="card-link">View Reports →</a>
-            </div>
-        </div>
+                    <div class="card">
+                        <div class="card-icon">🔄</div>
+                        <h3>Total Exchange Requests</h3>
+                        <p>Requests created on the platform</p>
+                        <div class="card-value" th:text="${totalRequests}">0</div>
+                        <a th:href="@{/admin/requests}" class="card-link">View Requests →</a>
+                    </div>
 
-        <div class="admin-section">
-            <h2>Management Tools</h2>
-            <div class="admin-tasks">
-                <button class="task-btn">👥 Manage Users</button>
-                <button class="task-btn">📖 Moderate Books</button>
-                <button class="task-btn">💬 View Messages</button>
-                <button class="task-btn">⚠️ Handle Reports</button>
-                <button class="task-btn">📊 View Analytics</button>
-                <button class="task-btn">⚙️ System Settings</button>
-            </div>
-        </div>
+                    <div class="card">
+                        <div class="card-icon">⚠️</div>
+                        <h3>Pending Requests</h3>
+                        <p>Requests awaiting seller action</p>
+                        <div class="card-value" th:text="${pendingRequests}">0</div>
+                        <a th:href="@{/admin/requests}" class="card-link">View Requests →</a>
+                    </div>
+                </div>
 
-        <div class="admin-section">
-            <h2>Recent Activities</h2>
-            <p style="color: #999;">No recent activities to display</p>
+                <div class="admin-section">
+                    <h2>Management Tools</h2>
+                    <div class="admin-tasks">
+                        <a th:href="@{/admin/users}" class="task-btn">👥 Manage Users</a>
+                        <a th:href="@{/admin/books}" class="task-btn">📖 Moderate Books</a>
+                        <a th:href="@{/admin/requests}" class="task-btn">🔄 View Exchange Requests</a>
+                        <button class="task-btn">⚠️ Handle Reports</button>
+                        <button class="task-btn">📊 View Analytics</button>
+                        <button class="task-btn">⚙️ System Settings</button>
+                    </div>
+                </div>
+
+                <div class="admin-section">
+                    <h2>Recent Users</h2>
+                    <div th:if="${recentUsers} and ${#lists.size(recentUsers)} > 0">
+                        <p th:each="user : ${recentUsers}" th:text="${user.username} + ' (' + ${user.email} + ')'" style="color: #666; margin-bottom: 0.5rem;"></p>
+                    </div>
+                    <p style="color: #999;" th:if="${recentUsers} == null or ${#lists.size(recentUsers)} == 0">No recent users to display</p>
+                </div>
+
+                <div class="admin-section">
+                    <h2>Recent Listings</h2>
+                    <div th:if="${recentListings} and ${#lists.size(recentListings)} > 0">
+                        <p th:each="listing : ${recentListings}" th:text="${listing.book.title} + ' by ' + ${listing.book.author}" style="color: #666; margin-bottom: 0.5rem;"></p>
+                    </div>
+                    <p style="color: #999;" th:if="${recentListings} == null or ${#lists.size(recentListings)} == 0">No recent listings to display</p>
+                </div>
+
+                <div class="admin-section">
+                    <h2>Recent Exchange Requests</h2>
+                    <div th:if="${recentRequests} and ${#lists.size(recentRequests)} > 0">
+                        <p th:each="req : ${recentRequests}" th:text="${req.buyer.username} + ' → ' + ${req.listing.book.title} + ' (' + ${req.status} + ')'" style="color: #666; margin-bottom: 0.5rem;"></p>
+                    </div>
+                    <p style="color: #999;" th:if="${recentRequests} == null or ${#lists.size(recentRequests)} == 0">No recent requests to display</p>
+                </div>
+            </div>
         </div>
     </div>
 </body>
