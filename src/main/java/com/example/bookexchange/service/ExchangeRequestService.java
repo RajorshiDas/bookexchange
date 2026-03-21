@@ -4,6 +4,9 @@ import com.example.bookexchange.entity.BookListing;
 import com.example.bookexchange.entity.ExchangeRequest;
 import com.example.bookexchange.entity.RequestStatus;
 import com.example.bookexchange.entity.User;
+import com.example.bookexchange.exception.BadRequestException;
+import com.example.bookexchange.exception.ForbiddenOperationException;
+import com.example.bookexchange.exception.ResourceNotFoundException;
 import com.example.bookexchange.repository.BookListingRepository;
 import com.example.bookexchange.repository.ExchangeRequestRepository;
 import com.example.bookexchange.repository.UserRepository;
@@ -45,17 +48,17 @@ public class ExchangeRequestService {
      * @param buyerId The ID of the buyer making the request
      * @param message Optional message from the buyer to the seller
      * @return The created ExchangeRequest
-     * @throws IllegalArgumentException if listing not found or buyer not found
+     * @throws ResourceNotFoundException if listing not found or buyer not found
      */
     @Transactional
     public ExchangeRequest createExchangeRequest(Long listingId, Long buyerId, String message) {
         // Fetch the listing
         BookListing listing = bookListingRepository.findById(listingId)
-                .orElseThrow(() -> new IllegalArgumentException("Book listing not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Book listing not found"));
 
         // Fetch the buyer
         User buyer = userRepository.findById(buyerId)
-                .orElseThrow(() -> new IllegalArgumentException("Buyer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Buyer not found"));
 
         // Create the exchange request
         ExchangeRequest request = new ExchangeRequest();
@@ -141,21 +144,23 @@ public class ExchangeRequestService {
      * @param requestId The exchange request ID
      * @param seller The seller user (must own the listing to accept)
      * @return The updated ExchangeRequest
-     * @throws IllegalArgumentException if request not found, seller does not own the listing
+     * @throws ResourceNotFoundException if the request is not found
+     * @throws ForbiddenOperationException if the seller does not own the listing
+     * @throws BadRequestException if the request is not pending
      */
     @Transactional
     public ExchangeRequest acceptExchangeRequest(Long requestId, User seller) {
         ExchangeRequest request = exchangeRequestRepository.findById(requestId)
-                .orElseThrow(() -> new IllegalArgumentException("Exchange request not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Exchange request not found"));
 
         // Verify that the seller owns the listing
         if (!request.getListing().getSeller().getId().equals(seller.getId())) {
-            throw new IllegalArgumentException("You do not have permission to accept this request");
+            throw new ForbiddenOperationException("You do not have permission to accept this request");
         }
 
         // Only allow accepting pending requests
         if (!request.getStatus().equals(RequestStatus.PENDING)) {
-            throw new IllegalArgumentException("Only pending requests can be accepted. Current status: " + request.getStatus());
+            throw new BadRequestException("Only pending requests can be accepted. Current status: " + request.getStatus());
         }
 
         request.setStatus(RequestStatus.ACCEPTED);
@@ -169,21 +174,23 @@ public class ExchangeRequestService {
      * @param requestId The exchange request ID
      * @param seller The seller user (must own the listing to reject)
      * @return The updated ExchangeRequest
-     * @throws IllegalArgumentException if request not found, seller does not own the listing
+     * @throws ResourceNotFoundException if the request is not found
+     * @throws ForbiddenOperationException if the seller does not own the listing
+     * @throws BadRequestException if the request is not pending
      */
     @Transactional
     public ExchangeRequest rejectExchangeRequest(Long requestId, User seller) {
         ExchangeRequest request = exchangeRequestRepository.findById(requestId)
-                .orElseThrow(() -> new IllegalArgumentException("Exchange request not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Exchange request not found"));
 
         // Verify that the seller owns the listing
         if (!request.getListing().getSeller().getId().equals(seller.getId())) {
-            throw new IllegalArgumentException("You do not have permission to reject this request");
+            throw new ForbiddenOperationException("You do not have permission to reject this request");
         }
 
         // Only allow rejecting pending requests
         if (!request.getStatus().equals(RequestStatus.PENDING)) {
-            throw new IllegalArgumentException("Only pending requests can be rejected. Current status: " + request.getStatus());
+            throw new BadRequestException("Only pending requests can be rejected. Current status: " + request.getStatus());
         }
 
         request.setStatus(RequestStatus.REJECTED);
@@ -197,21 +204,23 @@ public class ExchangeRequestService {
      * @param requestId The exchange request ID
      * @param buyer The buyer user (must be the one who made the request)
      * @return The updated ExchangeRequest
-     * @throws IllegalArgumentException if request not found, buyer did not make the request
+     * @throws ResourceNotFoundException if the request is not found
+     * @throws ForbiddenOperationException if the buyer did not make the request
+     * @throws BadRequestException if the request is not pending
      */
     @Transactional
     public ExchangeRequest cancelExchangeRequest(Long requestId, User buyer) {
         ExchangeRequest request = exchangeRequestRepository.findById(requestId)
-                .orElseThrow(() -> new IllegalArgumentException("Exchange request not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Exchange request not found"));
 
         // Verify that the buyer made this request
         if (!request.getBuyer().getId().equals(buyer.getId())) {
-            throw new IllegalArgumentException("You can only cancel your own requests");
+            throw new ForbiddenOperationException("You can only cancel your own requests");
         }
 
         // Only allow canceling pending requests
         if (!request.getStatus().equals(RequestStatus.PENDING)) {
-            throw new IllegalArgumentException("Only pending requests can be cancelled. Current status: " + request.getStatus());
+            throw new BadRequestException("Only pending requests can be cancelled. Current status: " + request.getStatus());
         }
 
         request.setStatus(RequestStatus.CANCELLED);
