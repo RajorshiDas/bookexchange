@@ -5,6 +5,9 @@ import com.example.bookexchange.entity.BookCondition;
 import com.example.bookexchange.entity.BookListing;
 import com.example.bookexchange.entity.ListingStatus;
 import com.example.bookexchange.entity.User;
+import com.example.bookexchange.exception.BadRequestException;
+import com.example.bookexchange.exception.ForbiddenOperationException;
+import com.example.bookexchange.exception.ResourceNotFoundException;
 import com.example.bookexchange.repository.BookListingRepository;
 import com.example.bookexchange.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,15 +57,15 @@ public class BookService {
      *
      * @param bookListingId The ID of the book listing
      * @param seller The seller user
-     * @throws IllegalAccessError if the seller does not own this listing
+     * @throws ForbiddenOperationException if the seller does not own this listing
      */
     public void verifySellerOwnership(Long bookListingId, User seller) {
         Optional<BookListing> listing = bookListingRepository.findById(bookListingId);
         if (listing.isEmpty()) {
-            throw new IllegalArgumentException("Book listing not found");
+            throw new ResourceNotFoundException("Book listing not found");
         }
         if (!listing.get().getSeller().getId().equals(seller.getId())) {
-            throw new IllegalAccessError("You do not have permission to modify this book listing");
+            throw new ForbiddenOperationException("You do not have permission to modify this book listing");
         }
     }
 
@@ -86,16 +89,16 @@ public class BookService {
                                 User seller) {
         // Validate required fields
         if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Book title is required");
+            throw new BadRequestException("Book title is required");
         }
         if (author == null || author.trim().isEmpty()) {
-            throw new IllegalArgumentException("Book author is required");
+            throw new BadRequestException("Book author is required");
         }
         if (condition == null) {
-            throw new IllegalArgumentException("Book condition is required");
+            throw new BadRequestException("Book condition is required");
         }
         if (price == null || price.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Valid price is required");
+            throw new BadRequestException("Valid price is required");
         }
 
         // Create the Book entity
@@ -147,21 +150,21 @@ public class BookService {
 
         // Validate required fields
         if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Book title is required");
+            throw new BadRequestException("Book title is required");
         }
         if (author == null || author.trim().isEmpty()) {
-            throw new IllegalArgumentException("Book author is required");
+            throw new BadRequestException("Book author is required");
         }
         if (condition == null) {
-            throw new IllegalArgumentException("Book condition is required");
+            throw new BadRequestException("Book condition is required");
         }
         if (price == null || price.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Valid price is required");
+            throw new BadRequestException("Valid price is required");
         }
 
         // Fetch the listing
         BookListing listing = bookListingRepository.findById(bookListingId)
-                .orElseThrow(() -> new IllegalArgumentException("Book listing not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Book listing not found"));
 
         // Update the associated Book
         Book book = listing.getBook();
@@ -196,7 +199,7 @@ public class BookService {
 
         // Fetch the listing to get the book ID
         BookListing listing = bookListingRepository.findById(bookListingId)
-                .orElseThrow(() -> new IllegalArgumentException("Book listing not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Book listing not found"));
 
         Long bookId = listing.getBook().getId();
 
