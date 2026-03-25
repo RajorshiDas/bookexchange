@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Details - Book Exchange</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; color: #333; }
+        nav { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        nav a { color: white; text-decoration: none; font-weight: 600; margin-right: 2rem; }
+        nav a:hover { opacity: 0.8; }
+        .logout-link { float: right; background: rgba(255, 255, 255, 0.2); padding: 0.5rem 1rem; border-radius: 5px; }
+        .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        .back-link { color: #667eea; text-decoration: none; margin-bottom: 2rem; display: inline-block; font-weight: 600; }
+        .back-link:hover { text-decoration: underline; }
+        .alert { padding: 1rem; margin-bottom: 1.5rem; border-radius: 5px; border-left: 4px solid; }
+        .alert.success { background-color: #d4edda; border-color: #28a745; color: #155724; }
+        .alert.error { background-color: #f8d7da; border-color: #dc3545; color: #721c24; }
+        .alert.warning { background-color: #fff3cd; border-color: #ffc107; color: #856404; }
+        .card { background: white; border-radius: 8px; padding: 2rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); margin-bottom: 2rem; }
+        .card h2 { color: #667eea; margin-bottom: 1.5rem; font-size: 1.5rem; }
+        .card h3 { color: #667eea; margin-top: 1.5rem; margin-bottom: 1rem; }
+        .section { margin-bottom: 2rem; }
+        .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 5px; }
+        .detail-item { display: flex; flex-direction: column; }
+        .detail-item label { font-weight: 600; color: #667eea; font-size: 0.9rem; }
+        .detail-item value { color: #333; margin-top: 0.5rem; }
+        .status-badge { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 20px; font-weight: 600; font-size: 0.9rem; margin: 1rem 0; }
+        .status-pending { background-color: #fff3cd; color: #856404; }
+        .status-accepted { background-color: #d4edda; color: #155724; }
+        .status-rejected { background-color: #f8d7da; color: #721c24; }
+        .message-box { background: #f8f9fa; padding: 1.5rem; border-left: 4px solid #667eea; border-radius: 4px; margin: 1.5rem 0; }
+        .message-box label { font-weight: 600; display: block; margin-bottom: 1rem; }
+        .message-box p { color: #555; line-height: 1.6; }
+        .button-group { display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap; }
+        .btn { display: inline-block; padding: 0.75rem 1.5rem; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer; text-decoration: none; transition: background-color 0.3s; font-weight: 600; }
+        .btn-primary { background-color: #667eea; color: white; }
+        .btn-primary:hover { background-color: #5568d3; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-success:hover { background-color: #218838; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-secondary:hover { background-color: #5a6268; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/seller/books">My Books</a>
+        <a href="/seller/requests">Exchange Requests</a>
+        <a href="/dashboard">Dashboard</a>
+        <form th:action="@{/auth/logout}" method="post" style="display:inline;">
+            <button type="submit" class="logout-link" style="background: none; border: none; padding: 0.5rem 1rem; cursor: pointer; color: white; font-weight: 600;">Logout</button>
+        </form>
+    </nav>
+
+    <div class="container">
+        <a href="/seller/requests" class="back-link">← Back to Requests</a>
+
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+        <!-- BOOK DETAILS -->
+        <div class="card">
+            <h2>📖 <span th:text="${request.listing.book.title}"></span></h2>
+            <span th:class="'status-badge ' + ('PENDING'.equals(request.status.name()) ? 'status-pending' : ('ACCEPTED'.equals(request.status.name()) ? 'status-accepted' : 'status-rejected'))"
+                  th:text="${request.status.name()}"></span>
+
+            <div class="section">
+                <h3>Book Information</h3>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <label>Title</label>
+                        <value th:text="${request.listing.book.title}"></value>
+                    </div>
+                    <div class="detail-item">
+                        <label>Author</label>
+                        <value th:text="${request.listing.book.author}"></value>
+                    </div>
+                    <div class="detail-item">
+                        <label>Condition</label>
+                        <value th:text="${request.listing.book.condition}"></value>
+                    </div>
+                    <div class="detail-item">
+                        <label>Price</label>
+                        <value>Rs. <span th:text="${request.listing.price}"></span></value>
+                    </div>
+                    <div class="detail-item" th:if="${request.listing.book.isbn != null}">
+                        <label>ISBN</label>
+                        <value th:text="${request.listing.book.isbn}"></value>
+                    </div>
+                    <div class="detail-item" th:if="${request.listing.book.category != null}">
+                        <label>Category</label>
+                        <value th:text="${request.listing.book.category}"></value>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" th:if="${request.listing.book.description != null}">
+                <h3>Description</h3>
+                <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px; line-height: 1.6;">
+                    <p th:text="${request.listing.book.description}"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- BUYER DETAILS -->
+        <div class="card">
+            <h2>👤 Buyer Information</h2>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <label>Name</label>
+                    <value th:text="|${request.buyer.firstName} ${request.buyer.lastName}|"></value>
+                </div>
+                <div class="detail-item">
+                    <label>Email</label>
+                    <value th:text="${request.buyer.email}"></value>
+                </div>
+                <div class="detail-item">
+                    <label>Requested On</label>
+                    <value th:text="${#temporals.format(request.createdAt, 'MMM dd, yyyy HH:mm')}"></value>
+                </div>
+            </div>
+
+            <!-- Message -->
+            <div th:if="${request.message != null}" class="message-box">
+                <label>💬 Buyer's Message:</label>
+                <p th:text="${request.message}"></p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div th:if="'PENDING'.equals(request.status.name())" class="button-group">
+                <a th:href="@{/seller/requests/{id}/confirm-accept(id=${request.id})}" class="btn btn-success">✅ Accept Request</a>
+                <a th:href="@{/seller/requests/{id}/confirm-reject(id=${request.id})}" class="btn btn-danger">❌ Reject Request</a>
+                <a href="/seller/requests" class="btn btn-secondary">Cancel</a>
+            </div>
+
+            <div th:if="!'PENDING'.equals(request.status.name())" class="button-group">
+                <a href="/seller/requests" class="btn btn-primary">Back to Requests</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

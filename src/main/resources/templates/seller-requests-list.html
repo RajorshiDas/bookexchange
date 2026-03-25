@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchange Requests - Book Exchange</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; color: #333; }
+        nav { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        nav a { color: white; text-decoration: none; font-weight: 600; margin-right: 2rem; }
+        nav a:hover { opacity: 0.8; }
+        .logout-link { float: right; background: rgba(255, 255, 255, 0.2); padding: 0.5rem 1rem; border-radius: 5px; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        h1 { margin-bottom: 1.5rem; color: #333; }
+        .tabs { display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid #ddd; }
+        .tab-button { padding: 1rem 1.5rem; background: none; border: none; cursor: pointer; font-size: 1rem; font-weight: 600; color: #666; border-bottom: 3px solid transparent; }
+        .tab-button.active { color: #667eea; border-bottom-color: #667eea; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .alert { padding: 1rem; margin-bottom: 1.5rem; border-radius: 5px; border-left: 4px solid; }
+        .alert.success { background-color: #d4edda; border-color: #28a745; color: #155724; }
+        .alert.error { background-color: #f8d7da; border-color: #dc3545; color: #721c24; }
+        .request-card { background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+        .request-card h3 { color: #667eea; margin-bottom: 1rem; }
+        .request-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .detail-item { display: flex; flex-direction: column; }
+        .detail-item label { font-weight: 600; color: #667eea; font-size: 0.9rem; }
+        .detail-item value { color: #333; margin-top: 0.25rem; }
+        .status-badge { display: inline-block; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; font-size: 0.85rem; margin-top: 0.5rem; }
+        .status-pending { background-color: #fff3cd; color: #856404; }
+        .status-accepted { background-color: #d4edda; color: #155724; }
+        .status-rejected { background-color: #f8d7da; color: #721c24; }
+        .request-message { background: #f8f9fa; padding: 1rem; border-left: 4px solid #667eea; border-radius: 4px; margin: 1rem 0; }
+        .request-message label { font-weight: 600; display: block; margin-bottom: 0.5rem; }
+        .button-group { display: flex; gap: 1rem; margin-top: 1.5rem; }
+        .btn { display: inline-block; padding: 0.75rem 1.5rem; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer; text-decoration: none; transition: background-color 0.3s; font-weight: 600; }
+        .btn-primary { background-color: #667eea; color: white; }
+        .btn-primary:hover { background-color: #5568d3; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-success:hover { background-color: #218838; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        .btn-info { background-color: #17a2b8; color: white; }
+        .btn-info:hover { background-color: #138496; }
+        .empty-state { text-align: center; padding: 3rem 1rem; background: white; border-radius: 8px; }
+        .empty-state h2 { color: #666; margin-bottom: 1rem; }
+        .empty-state p { color: #999; }
+    </style>
+    <script>
+        function switchTab(tabName) {
+            // Hide all tabs
+            var tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(function(tab) {
+                tab.classList.remove('active');
+            });
+
+            // Remove active class from all buttons
+            var buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(function(btn) {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+</head>
+<body>
+    <nav>
+        <a href="/seller/books">My Books</a>
+        <a href="/seller/requests">Exchange Requests</a>
+        <a href="/dashboard">Dashboard</a>
+        <form th:action="@{/auth/logout}" method="post" style="display:inline;">
+            <button type="submit" class="logout-link" style="background: none; border: none; padding: 0.5rem 1rem; cursor: pointer; color: white; font-weight: 600;">Logout</button>
+        </form>
+    </nav>
+
+    <div class="container">
+        <h1>📮 Exchange Requests for Your Books</h1>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('pending')">
+                ⏳ Pending <span th:text="'(' + ${#lists.size(pendingRequests)} + ')'"></span>
+            </button>
+            <button class="tab-button" onclick="switchTab('accepted')">
+                ✅ Accepted <span th:text="'(' + ${#lists.size(acceptedRequests)} + ')'"></span>
+            </button>
+            <button class="tab-button" onclick="switchTab('rejected')">
+                ❌ Rejected <span th:text="'(' + ${#lists.size(rejectedRequests)} + ')'"></span>
+            </button>
+        </div>
+
+        <!-- PENDING REQUESTS TAB -->
+        <div id="pending" class="tab-content active">
+            <div th:if="${#lists.size(pendingRequests) > 0}">
+                <div th:each="request : ${pendingRequests}" class="request-card">
+                    <h3>📖 <span th:text="${request.listing.book.title}"></span></h3>
+
+                    <div class="request-details">
+                        <div class="detail-item">
+                            <label>Buyer Name</label>
+                            <value th:text="|${request.buyer.firstName} ${request.buyer.lastName}|"></value>
+                        </div>
+                        <div class="detail-item">
+                            <label>Buyer Email</label>
+                            <value th:text="${request.buyer.email}"></value>
+                        </div>
+                        <div class="detail-item">
+                            <label>Requested On</label>
+                            <value th:text="${#temporals.format(request.createdAt, 'MMM dd, yyyy')}"></value>
+                        </div>
+                        <div class="detail-item">
+                            <label>Book Price</label>
+                            <value>Rs. <span th:text="${request.listing.price}"></span></value>
+                        </div>
+                    </div>
+
+                    <!-- Message -->
+                    <div th:if="${request.message != null}" class="request-message">
+                        <label>Buyer's Message:</label>
+                        <p th:text="${request.message}"></p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="button-group">
+                        <a th:href="@{/seller/requests/{id}/confirm-accept(id=${request.id})}" class="btn btn-success">✅ Accept Request</a>
+                        <a th:href="@{/seller/requests/{id}/confirm-reject(id=${request.id})}" class="btn btn-danger">❌ Reject Request</a>
+                        <a th:href="@{/seller/requests/{id}(id=${request.id})}" class="btn btn-info">View Details</a>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${#lists.size(pendingRequests) == 0}" class="empty-state">
+                <h2>No Pending Requests</h2>
+                <p>You don't have any pending exchange requests right now.</p>
+            </div>
+        </div>
+
+        <!-- ACCEPTED REQUESTS TAB -->
+        <div id="accepted" class="tab-content">
+            <div th:if="${#lists.size(acceptedRequests) > 0}">
+                <div th:each="request : ${acceptedRequests}" class="request-card">
+                    <h3>📖 <span th:text="${request.listing.book.title}"></span></h3>
+                    <span class="status-badge status-accepted">✅ ACCEPTED</span>
+
+                    <div class="request-details">
+                        <div class="detail-item">
+                            <label>Buyer Name</label>
+                            <value th:text="|${request.buyer.firstName} ${request.buyer.lastName}|"></value>
+                        </div>
+                        <div class="detail-item">
+                            <label>Buyer Email</label>
+                            <value th:text="${request.buyer.email}"></value>
+                        </div>
+                        <div class="detail-item">
+                            <label>Requested On</label>
+                            <value th:text="${#temporals.format(request.createdAt, 'MMM dd, yyyy')}"></value>
+                        </div>
+                        <div class="detail-item">
+                            <label>Book Price</label>
+                            <value>Rs. <span th:text="${request.listing.price}"></span></value>
+                        </div>
+                    </div>
+
+                    <!-- Message -->
+                    <div th:if="${request.message != null}" class="request-message">
+                        <label>Buyer's Message:</label>
+                        <p th:text="${request.message}"></p>
+                    </div>
+
+                    <div class="button-group">
+                        <a th:href="@{/seller/requests/{id}(id=${request.id})}" class="btn btn-info">View Details</a>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${#lists.size(acceptedRequests) == 0}" class="empty-state">
+                <h2>No Accepted Requests</h2>
+                <p>You haven't accepted any exchange requests yet.</p>
+            </div>
+        </div>
+
+        <!-- REJECTED REQUESTS TAB -->
+        <div id="rejected" class="tab-content">
+            <div th:if="${#lists.size(rejectedRequests) > 0}">
+                <div th:each="request : ${rejectedRequests}" class="request-card">
+                    <h3>📖 <span th:text="${request.listing.book.title}"></span></h3>
+                    <span class="status-badge status-rejected">❌ REJECTED</span>
+
+                    <div class="request-details">
+                        <div class="detail-item">
+                            <label>Buyer Name</label>
+                            <value th:text="|${request.buyer.firstName} ${request.buyer.lastName}|"></value>
+                        </div>
+                        <div class="detail-item">
+                            <label>Buyer Email</label>
+                            <value th:text="${request.buyer.email}"></value>
+                        </div>
+                        <div class="detail-item">
+                            <label>Requested On</label>
+                            <value th:text="${#temporals.format(request.createdAt, 'MMM dd, yyyy')}"></value>
+                        </div>
+                        <div class="detail-item">
+                            <label>Book Price</label>
+                            <value>Rs. <span th:text="${request.listing.price}"></span></value>
+                        </div>
+                    </div>
+
+                    <!-- Message -->
+                    <div th:if="${request.message != null}" class="request-message">
+                        <label>Buyer's Message:</label>
+                        <p th:text="${request.message}"></p>
+                    </div>
+
+                    <div class="button-group">
+                        <a th:href="@{/seller/requests/{id}(id=${request.id})}" class="btn btn-info">View Details</a>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${#lists.size(rejectedRequests) == 0}" class="empty-state">
+                <h2>No Rejected Requests</h2>
+                <p>You haven't rejected any exchange requests.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

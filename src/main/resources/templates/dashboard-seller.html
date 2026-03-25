@@ -218,24 +218,16 @@
                 <div class="card-icon">📖</div>
                 <h3>My Books</h3>
                 <p>Books you've listed for sale</p>
-                <div class="card-value">0</div>
-                <a href="#" class="card-link">Manage Books →</a>
+                <div class="card-value" th:text="${bookCount ?: 0}">0</div>
+                <a href="/seller/books" class="card-link">Manage Books →</a>
             </div>
 
             <div class="card">
-                <div class="card-icon">💰</div>
-                <h3>Total Sales</h3>
-                <p>Revenue from your sales</p>
-                <div class="card-value">$0.00</div>
-                <a href="#" class="card-link">View Sales →</a>
-            </div>
-
-            <div class="card">
-                <div class="card-icon">📦</div>
-                <h3>Pending Orders</h3>
-                <p>Orders waiting to be shipped</p>
-                <div class="card-value">0</div>
-                <a href="#" class="card-link">View Orders →</a>
+                <div class="card-icon">📮</div>
+                <h3>Exchange Requests</h3>
+                <p>Pending requests from buyers</p>
+                <div class="card-value" th:text="${pendingRequestCount ?: 0}">0</div>
+                <a href="/seller/requests" class="card-link">View Requests →</a>
             </div>
 
             <div class="card">
@@ -252,9 +244,7 @@
             <div class="action-buttons">
                 <a href="/seller/books/add" class="action-btn">➕ Add New Book</a>
                 <a href="/seller/books" class="action-btn">📚 View My Books</a>
-                <button class="action-btn">📦 Manage Orders</button>
-                <button class="action-btn">💬 Messages</button>
-                <button class="action-btn">💳 Payment Settings</button>
+                <a href="/seller/requests" class="action-btn">📮 Exchange Requests</a>
                 <button class="action-btn">⚙️ Account Settings</button>
             </div>
         </div>

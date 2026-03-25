@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accept Request - Book Exchange</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; color: #333; }
+        nav { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem 2rem; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        nav a { color: white; text-decoration: none; font-weight: 600; margin-right: 2rem; }
+        nav a:hover { opacity: 0.8; }
+        .logout-link { float: right; background: rgba(255, 255, 255, 0.2); padding: 0.5rem 1rem; border-radius: 5px; }
+        .container { max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+        .back-link { color: #667eea; text-decoration: none; margin-bottom: 2rem; display: inline-block; font-weight: 600; }
+        .back-link:hover { text-decoration: underline; }
+        .card { background: white; border-radius: 8px; padding: 2rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+        .card h2 { color: #28a745; margin-bottom: 1rem; font-size: 1.5rem; }
+        .warning-box { background: #e7f3ff; border-left: 4px solid #2196F3; padding: 1rem; border-radius: 4px; margin: 1rem 0; }
+        .warning-box strong { color: #2196F3; }
+        .info-box { background: #f8f9fa; padding: 1rem; border-radius: 4px; margin: 1rem 0; }
+        .info-box label { font-weight: 600; color: #667eea; }
+        .info-box value { display: block; color: #333; margin-top: 0.5rem; }
+        .divider { border-top: 1px solid #ddd; margin: 1.5rem 0; }
+        .button-group { display: flex; gap: 1rem; margin-top: 2rem; }
+        .btn { display: inline-block; padding: 0.75rem 1.5rem; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer; text-decoration: none; transition: background-color 0.3s; font-weight: 600; flex: 1; text-align: center; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-success:hover { background-color: #218838; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-secondary:hover { background-color: #5a6268; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/seller/books">My Books</a>
+        <a href="/seller/requests">Exchange Requests</a>
+        <a href="/dashboard">Dashboard</a>
+        <form th:action="@{/auth/logout}" method="post" style="display:inline;">
+            <button type="submit" class="logout-link" style="background: none; border: none; padding: 0.5rem 1rem; cursor: pointer; color: white; font-weight: 600;">Logout</button>
+        </form>
+    </nav>
+
+    <div class="container">
+        <a href="/seller/requests" class="back-link">← Back to Requests</a>
+
+        <div class="card">
+            <h2>✅ Accept Exchange Request?</h2>
+
+            <div class="warning-box">
+                <strong>⚠️ Important:</strong> Once you accept this request, the buyer will be notified. You can then proceed with the exchange.
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Book Information -->
+            <h3 style="color: #667eea; margin-bottom: 1rem;">📖 Book Details</h3>
+            <div class="info-box">
+                <label>Book Title</label>
+                <value th:text="${request.listing.book.title}"></value>
+            </div>
+
+            <div class="info-box">
+                <label>Buyer Name</label>
+                <value th:text="|${request.buyer.firstName} ${request.buyer.lastName}|"></value>
+            </div>
+
+            <div class="info-box">
+                <label>Buyer Email</label>
+                <value th:text="${request.buyer.email}"></value>
+            </div>
+
+            <div th:if="${request.message != null}" class="info-box">
+                <label>Buyer's Message</label>
+                <value th:text="${request.message}"></value>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Action Buttons -->
+            <form method="post" th:action="@{/seller/requests/{id}/accept(id=${request.id})}">
+                <div class="button-group">
+                    <button type="submit" class="btn btn-success">✅ Yes, Accept Request</button>
+                    <a href="/seller/requests" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
