@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -33,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(SecurityIntegrationTest.TestConfig.class)
+@ActiveProfiles("test")
 class SecurityIntegrationTest {
 
     @Autowired
@@ -170,4 +172,3 @@ class SecurityIntegrationTest {
         }
     }
 }
-
